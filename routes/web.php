@@ -5,7 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // INDEX
-Route::get('tasks', function () {
+Route::get('/', function () {
     return "HOME";
 })->name('home');
 
