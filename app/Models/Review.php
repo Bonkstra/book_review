@@ -10,6 +10,8 @@ class Review extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $fillable = ['review', 'rating'];
+
     public function book()
     {
         return $this->belongsTo(Book::class);
