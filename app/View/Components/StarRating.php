@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class StartRating extends Component
+class StarRating extends Component
 {
     /**
      * Create a new component instance.
@@ -22,6 +22,6 @@ class StartRating extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.start-rating');
+        return view('components.star-rating');
     }
 }
