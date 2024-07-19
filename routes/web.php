@@ -10,8 +10,11 @@ Route::get('/', function () {
     return redirect()->route('books.index');
 })->name('home');
 
-// BOOK
-Route::resource('books', App\Http\Controllers\BookController::class);
+// BOOKS
+Route::resource('books', App\Http\Controllers\BookController::class)->only(['index', 'show']);
+
+// REVIEWS
+Route::resource('books.reviews', App\Http\Controllers\ReviewController::class)->scoped(['review' => 'book'])->only(['create', 'store']);
 
 // FALLBACK
 Route::fallback(function () {

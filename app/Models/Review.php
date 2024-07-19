@@ -20,7 +20,8 @@ class Review extends Model
 
     protected static function booted()
     {
-        // IF A REVIEW IS UPDATED OR DELETED, DELETE THE BOOK CACHE
+        // IF A REVIEW IS CREATED, UPDATED OR DELETED, DELETE THE BOOK CACHE
+        static::created(fn (Review $review) => Cache::forget('book:' . $review->book->id));
         static::updated(fn (Review $review) => Cache::forget('book:' . $review->book->id));
         static::deleted(fn (Review $review) => Cache::forget('book:' . $review->book->id));
     }
