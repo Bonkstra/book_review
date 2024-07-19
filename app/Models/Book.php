@@ -47,6 +47,36 @@ class Book extends Model
         return $query->having('reviews_count', '>=', $minReviews);
     }
 
+    public function scopePopularLastWeek(Builder $query): Builder | QueryBuilder
+    {
+        return $query->popular(now()->subWeek(), now())->highestRated(now()->subWeek(), now())->minReviews(2);
+    }
+
+    public function scopePopularLastMonth(Builder $query): Builder | QueryBuilder
+    {
+        return $query->popular(now()->subMonth(), now())->highestRated(now()->subMonth(), now())->minReviews(2);
+    }
+
+    public function scopePopularAllTime(Builder $query): Builder | QueryBuilder
+    {
+        return $query->popular()->highestRated()->minReviews(2);
+    }
+
+    public function scopeHighestRatedLastWeek(Builder $query): Builder | QueryBuilder
+    {
+        return $query->highestRated(now()->subWeek(), now())->highestRated(now()->subWeek(), now())->popular(now()->subWeek(), now())->minReviews(2);
+    }
+
+    public function scopeHighestRatedLastMonth(Builder $query): Builder | QueryBuilder
+    {
+        return $query->highestRated(now()->subMonth(), now())->highestRated(now()->subMonth(), now())->popular(now()->subMonth(), now())->minReviews(2);
+    }
+
+    public function scopeHighestRatedAllTime(Builder $query): Builder | QueryBuilder
+    {
+        return $query->highestRated()->highestRated()->popular()->minReviews(2);
+    }
+
     private function dateRangeFilter(Builder $query, $from, $to)
     {
         if ($from && !$to) {

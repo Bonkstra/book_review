@@ -14,8 +14,10 @@
                 '' => 'latest',
                 'popular_last_week' => 'Popular Last Week',
                 'popular_last_month' => 'Popular Last Month',
+                'popular_all_time' => 'Popular All Time',
                 'highest_rated_last_week' => 'Highest Rated Last week',
                 'highest_rated_last_moth' => 'Highest Rated Last Month',
+                'highest_rated_all_time' => 'Highest Rated All Time',
             ];
         @endphp
         @foreach ($filters as $key => $label)
