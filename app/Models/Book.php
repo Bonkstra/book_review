@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Support\Facades\Cache;
 
 class Book extends Model
 {
@@ -22,24 +23,28 @@ class Book extends Model
         return $query->where('title', 'LIKE', '%' . $title . '%');
     }
 
-    public function scopePopular(Builder $query, $from = NULL, $to = NULL): Builder | QueryBuilder
+    public function scopeWithReviewsCount(Builder $query, $from = NULL, $to = NULL): Builder | QueryBuilder
     {
-        // SHORT HAND SYNTAX
         return $query->withCount([
             'reviews' => fn (Builder $sub_query) => $this->dateRangeFilter($sub_query, $from, $to)
-        ])->orderBy('reviews_count', 'desc');
+        ]);
+    }
 
-        // COMPLETE SYNTAX
-        // return $query->withCount(['reviews' => function (Builder $sub_query) use ($from, $to) {
-        //     $this->dateRangeFilter($sub_query, $from, $to);
-        // }])->orderBy('reviews_count', 'desc');
+    public function scopeWithAvgRating(Builder $query, $from = NULL, $to = NULL): Builder | QueryBuilder
+    {
+        return $query->withAvg([
+            'reviews' => fn (Builder $sub_query) => $this->dateRangeFilter($sub_query, $from, $to)
+        ], 'rating');
+    }
+
+    public function scopePopular(Builder $query, $from = NULL, $to = NULL): Builder | QueryBuilder
+    {
+        return $query->WithReviewsCount()->orderBy('reviews_count', 'desc');
     }
 
     public function scopeHighestRated(Builder $query, $from = NULL, $to = NULL): Builder | QueryBuilder
     {
-        return $query->withAvg([
-            'reviews' => fn (Builder $sub_query) => $this->dateRangeFilter($sub_query, $from, $to)
-        ], 'rating')->orderBy('reviews_avg_rating', 'desc');
+        return $query->WithAvgRating()->orderBy('reviews_avg_rating', 'desc');
     }
 
     public function scopeMinReviews(Builder $query, int $minReviews): Builder | QueryBuilder
@@ -86,5 +91,12 @@ class Book extends Model
         } elseif ($from && $to) {
             $query->whereBetween('created_at', [$from, $to]);
         }
+    }
+
+    protected static function booted()
+    {
+        // IF A BOOK IS UPDATED OR DELETED, DELETE THE BOOK CACHE
+        static::updated(fn (Book $book) => Cache::forget('book:' . $book->id));
+        static::deleted(fn (Book $book) => Cache::forget('book:' . $book->id));
     }
 }
