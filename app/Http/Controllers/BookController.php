@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class BookController extends Controller
 {
@@ -24,10 +25,10 @@ class BookController extends Controller
             'highest_rated_last_week' => $books->highestRatedLastWeek(),
             'highest_rated_last_moth' => $books->highestRatedLastMonth(),
             'highest_rated_all_time' => $books->highestRatedAllTime(),
-            default => $books->latest(),
+            default => $books->popular()->minReviews(2)->HighestRated()->latest(),
         };
 
-        $books = $books->get();
+        $books = Cache::remember('books:' . $filter . ':' . $title, 3600, fn () => $books->get());
 
         return view('books.index', ['books' => $books]);
     }
@@ -51,9 +52,13 @@ class BookController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Book $book)
     {
-        //
+        $book = Cache::remember('book:' . $book->id, 3600, fn () => $book->load([
+            'reviews' => fn ($query) => $query->latest(),
+        ]));
+
+        return view('books.show', ['book' => $book]);
     }
 
     /**
